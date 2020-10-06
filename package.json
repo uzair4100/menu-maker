@@ -1,0 +1,36 @@
+{
+  "name": "Menu_Maker",
+  "version": "1.0.0",
+  "description": "update menu files",
+  "main": "main.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "electron .",
+    "pack": "electron-builder --dir",
+    "dist": "electron-builder",
+    "dist-all": "electron-builder -mw"
+  },
+  "build": {
+    "appId": "com.menu.quickstart",
+    "win": {
+      "target": "nsis"
+    },
+    "asar": "false"
+  },
+  "author": "uzair",
+  "license": "MIT",
+  "devDependencies": {
+    "cross-env": "^7.0.1",
+    "electron": "^8.3.2",
+    "electron-builder": "^22.4.0",
+    "electron-packager": "^14.2.1",
+    "electron-prebuilt": "^1.4.13"
+  },
+  "dependencies": {
+    "cheerio": "^1.0.0-rc.3",
+    "electron-build": "0.0.3",
+    "jquery": "^3.5.1",
+    "open": "^7.0.4",
+    "pretty": "^2.0.0"
+  }
+}
