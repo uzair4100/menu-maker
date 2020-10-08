@@ -1,55 +1,56 @@
 body {
-  background: floralwhite !important;
+    background: floralwhite !important;
 }
 
 #wrapper {
-  margin: 0;
+    margin: 0;
 }
+
 .ql-toolbar {
-  background: lightcyan !important;
+    background: lightcyan !important;
 }
 
 .ql-formats .ql-active {
-  background: cyan !important;
-  color: #fff !important;
-  margin: 2px !important;
-  border-radius: 5px;
+    background: cyan !important;
+    color: #fff !important;
+    margin: 2px !important;
+    border-radius: 5px;
 }
 
 .nav-tabs .nav-item.show .nav-link,
 .nav-tabs .nav-link.active {
-  font-size: 23px !important;
-  border-bottom: 4px solid blue !important;
-  color: rgb(32, 31, 31) !important;
+    font-size: 23px !important;
+    border-bottom: 4px solid blue !important;
+    color: rgb(32, 31, 31) !important;
 }
 
 #courseName,
 #language,
 #unit1Name,
 #unit2Name {
-  height: 40px;
-  border-radius: 10px;
-  padding: 15px;
-  color: darkblue;
-  font-size: 20px;
-  font-style: italic;
-  font-weight: 600;
+    height: 40px;
+    border-radius: 10px;
+    padding: 15px;
+    color: darkblue;
+    font-size: 20px;
+    font-style: italic;
+    font-weight: 600;
 }
 
 #paths {
-  display: flex;
-  justify-content: space-between;
+    display: flex;
+    justify-content: space-between;
 }
 
 .toggle-handle {
-  background: whitesmoke !important;
+    background: whitesmoke !important;
 }
 
 label {
-  margin: 1px;
-  color: darkslategrey;
-  font-weight: 600;
-  font-size: 18px;
+    margin: 1px;
+    color: darkslategrey;
+    font-weight: 600;
+    font-size: 18px;
 }
 
 #workset1,
@@ -60,33 +61,36 @@ label {
 #oral2,
 #outcome2,
 #seminar2 {
-  background: azure;
-  box-shadow: 3px 3px 10px rgba(0, 0, 0, 0.7);
-  border-radius: 10px;
-  height: 750px;
-  overflow-x: auto;
-  overflow-y: auto;
-  width: 100%;
-  margin-top: 3px;
-  padding: 0;
+    background: azure;
+    box-shadow: 3px 3px 10px rgba(0, 0, 0, 0.7);
+    border-radius: 10px;
+    height: 750px;
+    overflow-x: auto;
+    overflow-y: auto;
+    width: 100%;
+    margin-top: 3px;
+    padding: 0;
 }
 
 #heading {
-  font-size: 16px;
-  color: black;
-  font-weight: bold;
+    font-size: 16px;
+    color: black;
+    font-weight: bold;
 }
 
 .right-side {
-  display: flex;
-  align-items: center;
-  flex-direction: column;
+    display: flex;
+    align-items: center;
+    flex-direction: column;
 }
 
 input[type="date"]::-webkit-calendar-picker-indicator {
-  background: url("https://img.icons8.com/doodle/20/000000/planner.png");
-  background-position: center;
-  background-size: 20px 20px;
-  background-repeat: no-repeat;
-  color: rgba(204, 204, 204, 0);
+    background-image: url("./images/calendar.png");
+    height: 15px;
+    width: 18px;
+    background-position: center;
+    background-size: cover;
+    -webkit-background-size: cover;
+    color: rgba(204, 204, 204, 0);
+    opacity: 1;
 }
