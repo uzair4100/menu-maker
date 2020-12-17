@@ -7,11 +7,18 @@ var cheerio = require("cheerio");
 var pretty = require("pretty");
 
 $(document).ready(function() {
+    //open links in default browser
+    $(document).on('click', 'a[href^="http"]', function(event) {
+        event.preventDefault();
+        shell.openExternal(this.href);
+    });
 
     var cheer,
         unit1Name,
         unit2Name,
         source,
+        source2,
+        bak,
         newFile,
         yearCalender,
         course,
@@ -45,17 +52,17 @@ $(document).ready(function() {
 
     worksetHeader = `
     <!--stat workset header-->
-    <div class="d-flex justify-content-start p-2 bg-primary text-white" id="worksetHeader">
-      <p class="h5 ml-3 mr-4">ID</p>
-      <p class="h5 mx-4">No</p>
-      <p class="h5 mx-4">Visible</p>
+    <div class="d-flex justify-content-start p-2 bg-info text-white" id="worksetHeader">
+      <p class="h5 ml-3 mr-5">ID</p>
+      <p class="h5 ml-2">No</p>
+      <p class="h5 ml-4 mr-2">Visible</p>
       <p class="h5 mx-5">Duedate</p>
-      <p class="h5" style="margin-left: 95px !important">Name:</p>
+      <p class="h5" style="margin-left: 100px !important">Name:</p>
     </div>
     <!--end workset header-->`;
 
     oralLessonHeader = `
-    <div class="d-flex justify-content-between p-2 bg-primary text-white" id="oralLessonHeader">
+    <div class="d-flex justify-content-between p-2 bg-info text-white" id="oralLessonHeader">
       <p class="h5 ml-3">ID</p>
       <p class="h5 mr-5">Description</p>
       <p class="h5 mr-5">Duedate</p>
@@ -83,7 +90,6 @@ $(document).ready(function() {
         theme: "snow"
     };
 
-
     $("#left").change(function() {
         $("ul.nav-tabs a").click(function(e) {
             e.preventDefault();
@@ -91,6 +97,7 @@ $(document).ready(function() {
         });
 
         //empty tab divs
+        $(".ws,.ol,.oc,.sem").html("");
 
         workset1 = "";
         workset2 = "";
@@ -105,12 +112,14 @@ $(document).ready(function() {
 
         if ($("#server").is(":checked")) {
             source = "\\\\vslmoodle01-melm\\courses$\\webroot\\" + yearCalender + "\\" + course + "\\" + year + "\\menu.xml";
-            newFile = "\\\\vslmoodle01-melm\\courses$\\webroot\\" + yearCalender + "\\" + course + "\\" + year + "\\menu2.xml";
+            source2 = "\\\\vslmoodle01-melm\\courses$\\webroot\\" + yearCalender + "\\" + course + "\\" + year + "\\menu_test.xml";
+            bak = "\\\\vslmoodle01-melm\\courses$\\webroot\\" + yearCalender + "\\" + course + "\\" + year + "\\menu.xml.bak";
         } else {
             source = "\\\\vsl-file01\\coursesdev$\\courses\\" + yearCalender + "\\" + course + "\\" + year + "\\menu.xml";
-            newFile = "\\\\vsl-file01\\coursesdev$\\courses\\" + yearCalender + "\\" + course + "\\" + year + "\\menu2.xml";
+            source2 = "\\\\vsl-file01\\coursesdev$\\courses\\" + yearCalender + "\\" + course + "\\" + year + "\\menu_test.xml";
+            bak = "\\\\vsl-file01\\coursesdev$\\courses\\" + yearCalender + "\\" + course + "\\" + year + "\\menu.xml.bak";
         }
-        // source = path.join(require("os").homedir(), "Desktop/menu.xml");
+        //source = path.join(require("os").homedir(), "Desktop/menu.xml");
         console.log(source);
 
         //read file
@@ -219,8 +228,8 @@ $(document).ready(function() {
             u2_Workset = saveWorkset(secondWorkset);
             u1_orallesson = saveOrallesson(firstOrallesson);
             u2_orallesson = saveOrallesson(secondOrallesson);
-            u1_outcome = saveOutcome(firstOutcome);
-            u2_outcome = saveOutcome(secondOutcome);
+            u1_outcome = saveOutcome(firstOutcome, 1);
+            u2_outcome = saveOutcome(secondOutcome, 2);
 
             //write new content in cheerio
             cheer("worksets").first().html(u1_Workset);
@@ -231,15 +240,27 @@ $(document).ready(function() {
             cheer("outcomes").last().html(u2_outcome);
 
             newWorkset = cheer.html();
-            newWorkset = newWorkset.replace(/&(?!(\S)+;)/g, "&amp;");
+            newWorkset = newWorkset
+                .replace(/&(?!(\S)+;)/g, "&amp;")
+                .replace(/&lt;/g, "<")
+                .replace(/&gt;/g, ">")
+                .replace(/<p><br[\/]?><[\/]?p>/g, "");
             newWorkset = pretty(newWorkset, { ocd: true });
             console.log(newWorkset);
-            fs.writeFile(source, newWorkset, function(err) {
-                if (!err) {
-                    $("#status").html("File Updated!");
-                    displayMessage();
-                }
-            });
+
+            setTimeout(() => {
+                fs.writeFile(bak, newWorkset, function(err) {
+                    if (!err) {
+                        //fs.writeFileSync(source2, newWorkset);
+                        //fs.writeFileSync(bak, newWorkset);
+                        $("#status").addClass('alert-primary').removeClass('alert-danger').html("Updated " + course + " " + year);
+                        displayMessage();
+                    } else {
+                        $("#status").removeClass('alert-primary').addClass('alert-danger').html("Some Error occurred!!!");
+                        displayMessage();
+                    }
+                });
+            }, 300);
             //console.log(newContent)
         }
     });
@@ -250,7 +271,7 @@ $(document).ready(function() {
         let workset = "";
         no.find("workset").each(function() {
             //console.log(cheer(this).text());
-            if (cheer(this).attr("hide") !== undefined) {
+            if (!cheer(this).attr("hide") || cheer(this).attr("hide") == "no") {
                 checker = "checked";
             } else {
                 checker = "";
@@ -258,7 +279,7 @@ $(document).ready(function() {
             let wsID = cheer(this).attr("id");
             let wsNum = cheer(this).attr("num");
             let dueDate = cheer(this).attr("due").toString().trim();
-            let dateOnly = dueDate.slice(0, 4)
+            let dateOnly = dueDate.slice(0, 4);
             dueDate = dueDate.slice(0, 4) + "-" + dueDate.slice(4, 6) + "-" + dueDate.slice(6, 8);
             let text = cheer(this).text();
 
@@ -303,7 +324,7 @@ $(document).ready(function() {
             let hideValue, hideAttr;
             if ($(this).find("#Hide").prop("checked") == false) {
                 hideValue = "yes";
-                hideAttr = "";
+                hideAttr = `hide="${hideValue}"`;
             } else {
                 hideValue = "no";
                 hideAttr = `hide="${hideValue}"`;
@@ -354,6 +375,7 @@ $(document).ready(function() {
     }
 
     function getOutcome(no) {
+        let u = no.attr("id");
         let outcome = "",
             count = 0;
         var editor = [];
@@ -364,11 +386,11 @@ $(document).ready(function() {
             let name = cheer(this).children("name").text();
             let duration = cheer(this).children("duration").text();
             let description = cheer(this).children("description").text();
-            editor.push("editor" + ocID);
+            editor.push("editor_" + u + "_" + ocID);
             let numb = editor.length;
             outcome += `
-          <div class="bg-white my-3 mx-4 pb-2 h-100% rounded shadow  border border-primary outcome">
-          <div class="bg-primary text-white mb-2 py-2 text-center">Outcome${numb}</div>
+          <div class="bg-white my-3 mx-4 pb-2 h-100% rounded shadow  border border-info outcome">
+          <div class="bg-info text-white mb-2 py-2 text-center">Outcome${numb}</div>
 
            <div class="container">
               <div class="row  mb-2">
@@ -393,35 +415,34 @@ $(document).ready(function() {
                       <div class="input-group-prepend">
                           <span class="input-group-text text-bold">Duration</span>
                       </div>
-                      <input type="text" class="form-control" id="duration" value="${duration}"></input>
+                      <input type="text" class="form-control" id="duration" placeholder="e.g. 20 mins" value="${duration}"></input>
                   </div>
                   <div class="input-group col-7">
                   <div class="input-group-prepend">
                       <span class="input-group-text text-bold">Name</span>
                   </div>
-                  <input type="text" class="form-control" id="name" value="${name}"></input>
+                  <input type="text" class="form-control" id="name" placeholder="e.g. Outcome 1: Interpersonal communication" value="${name}"></input>
               </div>
       
               </div>
               <!--body end-->
       
-              <div class="w-100" placeholder="Description" id="editor${ocID}">${description}</div>
+              <div class="w-100" placeholder="Description" id="editor_${u}_${ocID}">${description}</div>
             </div>
           </div>
                 `;
             setTimeout(() => {
-                editor[count] = new Quill(`#editor${ocID}`, options);
+                editor[count] = new Quill(`#editor_${u}_${ocID}`, options);
                 console.log(editor[count]);
                 count++;
-            }, 50);
+            }, 200);
         }); //loop
         console.log(editor);
         return outcome;
     }
 
-    function saveOutcome(no) {
+    function saveOutcome(no, u) {
         let outcome = "";
-
         //save outcome data
         no.each(function() {
             let ocID = $(this).find("#ocID").val();
@@ -429,7 +450,7 @@ $(document).ready(function() {
             datedue = datedue.split("-").join("");
             let name = $(this).find("#name").val();
             let duration = $(this).find("#duration").val();
-            let editorName = `#editor${ocID}`;
+            let editorName = `#editor_${u}_${ocID}`;
             let description = $(editorName).find(".ql-editor").html();
             description = description.replace(/<p><br[\/]?><[\/]?p>/g, "").replace(/<p><b[\/]?>\s<[\/]?p>/g, "");
             console.log(description);
@@ -454,8 +475,8 @@ $(document).ready(function() {
     function displayMessage() {
         $("#status").show();
         setTimeout(function() {
-            $("#status").fadeOut(1000);
-        }, 2000);
+            $("#status").fadeOut(500);
+        }, 3000);
     }
     //clear app
     $("#clear").click(function() {

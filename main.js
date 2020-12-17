@@ -10,8 +10,10 @@ const { shell } = require("electron");
 app.on("ready", function() {
     //create new window
     mainWindow = new BrowserWindow({
-        width: 1250,
-        height: 1035,
+        minWidth: 1220,
+        width: 1220,
+        minHeight: 1030,
+        height: 1030,
         webPreferences: {
             nodeIntegration: true
         }
