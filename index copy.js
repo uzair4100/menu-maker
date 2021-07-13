@@ -114,26 +114,31 @@ $(document).ready(function() {
         course = $("#courses").find("input[type=radio]:checked").siblings("label").text();
         year = $("#year").find("input[type=radio]:checked").siblings("label").text();
 
-        if ($("#testing").is(":checked")) {
-            //variables for testing 
-            s1_path = path.join(os.homedir(), "Desktop/seminar1.html");
-            s2_path = path.join(os.homedir(), "Desktop/seminar2.html");
-            source = path.join(require("os").homedir(), "Desktop/menu.xml");
-            source2 = path.join(require("os").homedir(), "Desktop/menu_test.xml");
-
+        if ($("#server").is(":checked")) {
+            source = "\\\\vslmoodle01-melm\\courses$\\webroot\\" + yearCalender + "\\" + course + "\\" + year + "\\menu.xml";
+            source2 = "\\\\vslmoodle01-melm\\courses$\\webroot\\" + yearCalender + "\\" + course + "\\" + year + "\\menu_test.xml";
+            bak = "\\\\vslmoodle01-melm\\courses$\\webroot\\" + yearCalender + "\\" + course + "\\" + year + "\\menu.xml.bak";
+            s1_path = "\\\\vslmoodle01-melm\\courses$\\webroot\\" + yearCalender + "\\" + course + "\\" + year + "\\seminar1.html";
+            s2_path = "\\\\vslmoodle01-melm\\courses$\\webroot\\" + yearCalender + "\\" + course + "\\" + year + "\\seminar2.html";
         } else {
-            // source = "\\\\vsl-file01\\coursesdev$\\courses\\" + yearCalender + "\\" + course + "\\" + year + "\\menu.xml";
-            // source2 = "\\\\vsl-file01\\coursesdev$\\courses\\" + yearCalender + "\\" + course + "\\" + year + "\\menu_test.xml";
-            // bak = "\\\\vsl-file01\\coursesdev$\\courses\\" + yearCalender + "\\" + course + "\\" + year + "\\menu.xml.bak";
-            // s1_path = "\\\\vsl-file01\\coursesdev$\\courses\\" + yearCalender + "\\" + course + "\\" + year + "\\seminar1.html";
-            // s2_path = "\\\\vsl-file01\\coursesdev$\\courses\\" + yearCalender + "\\" + course + "\\" + year + "\\seminar2.html";
+            source = "\\\\vsl-file01\\coursesdev$\\courses\\" + yearCalender + "\\" + course + "\\" + year + "\\menu.xml";
+            source2 = "\\\\vsl-file01\\coursesdev$\\courses\\" + yearCalender + "\\" + course + "\\" + year + "\\menu_test.xml";
+            bak = "\\\\vsl-file01\\coursesdev$\\courses\\" + yearCalender + "\\" + course + "\\" + year + "\\menu.xml.bak";
+            s1_path = "\\\\vsl-file01\\coursesdev$\\courses\\" + yearCalender + "\\" + course + "\\" + year + "\\seminar1.html";
+            s2_path = "\\\\vsl-file01\\coursesdev$\\courses\\" + yearCalender + "\\" + course + "\\" + year + "\\seminar2.html";
         }
 
+        // s1_path = path.join(os.homedir(), "Desktop/seminar1.html");
+        // s2_path = path.join(os.homedir(), "Desktop/seminar2.html");
+
+        // source = path.join(require("os").homedir(), "Desktop/menu.xml");
         s1 = fileRead(s1_path);
         s2 = fileRead(s2_path);
         console.log(source)
         console.log(s1_path)
         console.log(s2_path)
+
+
 
         //read file
         fs.readFile(source, "utf-8", function(err, data) {
@@ -180,7 +185,6 @@ $(document).ready(function() {
                 var second = cheer("unit").last();
                 var sem1Stats = $("#seminar1");
                 var sem2Stats = $("#seminar2");
-                // $("#seminar1,#seminar2").append(`<button class="btn btn-primary btn-lg mt-1 add">Add Seminar</button>`);
 
                 //call functions to get html
                 workset1 = getWorkset(first);
@@ -203,48 +207,27 @@ $(document).ready(function() {
                 $("#outcome2").html(outcome2);
                 $("#seminar1").html(seminar1);
                 $("#seminar2").html(seminar2);
-                $("#seminar1").prepend(`<button class="btn btn-primary add">add</button>`);
 
             } else {
                 $("#workset1,#workset2,#oral1,#oral2,#outcome1,#outcome2,#seminar1,#seminar2").html(err);
                 // $("#workset2").html(err);
             }
         });
-        //seminar accordian
-
     }); //end wrapper inner
 
-    $(document).click(function(e) {
+    /* $('#wrapper').click(function(e) {
+         if ($(e.target).attr('class') == "del") {
+             $(e.target).parent().parent('.sem').remove();
+             console.log("clicked");
+         }
 
-        if ($(e.target).attr('class') == "del") {
-            $(e.target).parent().parent('.sem').remove();
-            console.log("clicked");
-        }
+         if ($(e.target).attr('class') == "add") {
+             let lastSeminar = $(e.target).parent().siblings('.sem').last();
+             let holder = lastSeminar.clone();
+             lastSeminar.after(holder);
+         }
 
-        if ($(e.target).hasClass("add")) {
-            let lastSeminar = $(e.target).closest('.tab-pane').children(".sem").last();
-            let no = lastSeminar.find(".no").html();
-            no = parseInt(no.charAt(no.length - 1))
-            alert(no)
-            console.log(lastSeminar)
-            let holder = lastSeminar.clone();
-            //holder=$.parseHTML(holder)
-            holder.find('.no').html(`Seminar ${no+1}`);
-            lastSeminar.after(holder);
-        }
-        // $(".sem_selector").siblings().slideUp();
-        if ($(e.target).hasClass("sem_selector")) {
-            let selector = $(e.target);
-            let others = selector.parent().siblings();
-
-            selector.find('.sign').addClass("minus");
-            selector.siblings().slideToggle();
-            selector.find(".name").parent().siblings(".myDIV").slideToggle();
-            others.find(".sem_content").slideUp();
-            others.find(".myDIV").slideUp();
-        }
-
-    })
+     })*/
 
     /////////////////////////////////////////////////////////////////// submit ///////////////////////////////////////////////////////////////////////
 
@@ -321,8 +304,8 @@ $(document).ready(function() {
                 if ($('#updateMenu').prop("checked") == true) {
                     fs.writeFile(source, newWorkset, function(err) {
                         if (!err) {
-                            // fs.writeFileSync(source2, newWorkset);
-                            // fs.writeFileSync(bak, newWorkset);
+                            fs.writeFileSync(source2, newWorkset);
+                            fs.writeFileSync(bak, newWorkset);
 
                             $("#status").addClass('alert-primary').removeClass('alert-danger').html("Updated " + course + " " + year);
                             displayMessage();
@@ -558,7 +541,7 @@ $(document).ready(function() {
     function getSeminar(content, s) {
         let sem = "";
         let editor = [];
-        let $ = cheerio.load(content, { normalizeWhitespace: true, xmlMode: false, decodeEntities: false, withDomLvl1: true });
+        let $ = cheerio.load(content, { normalizeWhitespace: true, xmlMode: true, decodeEntities: false, withDomLvl1: true });
 
         //start loop
         $('.seminar').each(function(i) {
@@ -572,13 +555,12 @@ $(document).ready(function() {
             editor.push("editor_" + s + "_" + i);
             sem += ` 
                         <div class="bg-white my-3 mx-4 pb-2 h-100% rounded shadow  border border-dark sem">
-                            <div class="d-flex justify-content-between bg-dark text-white mb-2 py-1 text-center sem_selector">
-                                <div class="h4 sign">+</div>
-                                <div class="no">Seminar ${i + 1}</div>
+                            <div class="d-flex justify-content-between bg-dark text-white mb-2 py-2 text-center">
+                                <div>Seminar ${i + 1}</div>
                                 <div class="del">X</div>
                             </div>
 
-                           <div class="container sem_content">                    
+                           <div class="container">                    
                                 <div class="row mb-3">
                                     <div class="input-group col-5">
                                         <div class="input-group-prepend">
@@ -612,6 +594,7 @@ $(document).ready(function() {
     function saveSeminar(content, newContent) {
         let seminarData = "";
         let $ = cheerio.load(content);
+
         //start loop
         newContent.find('.sem').each(function(i) {
 
@@ -620,31 +603,27 @@ $(document).ready(function() {
             let newDesc = newContent.find(".ql-editor").eq(i).html();
 
             let currentSeminar = $(".seminar").eq(i);
-            console.log(currentSeminar)
-            let id = `"sem"${i+1}`;
-            if (newContent.find(".sem").eq(i) == $('.seminar').eq(i)) {
-                currentSeminar.find(".seminar-name").html(newName);
-                currentSeminar.find(".dt").html(newDate);
-                currentSeminar.find(".myDIV").html(newDesc);
-            } else {
-                let newSem = `
-                            <div class="seminar-selector">
-                                <div class="seminar-name">${newName}</div>
-                                <div class="dt">${newDate}</div>
-                            </div>
-                            <div style="clear:both"></div>
-                            <div id="sem1" class="myDIV">${newDesc}</div>`;
 
-                $('.seminar_divs-column1').append(newSem)
-                console.log(newSem)
-            }
+            currentSeminar.find(".seminar-name").html(newName);
+            currentSeminar.find(".dt").html(newDate);
+            currentSeminar.find(".myDIV").html(newDesc);
 
+            /*seminarData += `
+               <div class="seminar">
+                    <div class="seminar-selector">
+                        ${newName}
+                        <div class="dt">${newDate}</div>
+                    </div>
+                    <div id=${eq(i) + 1} class="myDIV" style="display: none;">
+                        ${newDesc}
+                    </div>
+                </div>`;*/
 
         }); //end loop
 
         seminarData = $.html();
 
-        console.log(seminarData);
+        //console.log(seminarData);
         return seminarData;
     }
 
@@ -675,90 +654,6 @@ $(document).ready(function() {
             $("#status").fadeOut(500);
         }, 3000);
     }
-
-    function checkUpdates() {
-        document.querySelector("#filePath").value = localStorage.getItem("path") //get path from local storgae
-
-        let user = "uzair4100";
-        let repo = "activity-maker";
-        let outputdir = path.join(os.homedir(), "AppData/Local/activity-maker/pending");
-        console.log(outputdir);
-        let leaveZipped = false;
-
-        ipcRenderer.on("version", function(e, appVersion) {
-            console.log(appVersion);
-            let currentVersion = appVersion;
-            axios.get(`https://api.github.com/repos/${user}/${repo}/releases/latest`)
-                .then((resp) => {
-                    let data = resp.data
-                    console.log(data)
-                    let appName = data.assets[0].name;
-                    let latestVersion = data.tag_name;
-                    console.log('latestVersion is ' + latestVersion);
-                    if (appVersion != "") {
-                        if (currentVersion != latestVersion) {
-                            console.log("update found")
-                            modal.style.display = "";
-                            document.querySelector(".card-body").innerHTML = "update found";
-                            if (fs.existsSync(outputdir + "/" + appName)) {
-                                ipcRenderer.send("downloaded")
-                            } else {
-                                modal.style.display = "";
-                                !fs.existsSync(outputdir) ? fs.mkdirSync(outputdir) : "";
-                                let existingFile = fs.readdirSync(outputdir).filter((file) => path.extname(file) == ".exe"); //check for existing exe file and delete them first
-                                existingFile.forEach((file) => fs.unlinkSync(outputdir + "/" + file));
-                                //console.log(data)
-                                let url_exe = data.assets[0].browser_download_url;
-                                console.log(url_exe)
-                                    // shell.openExternal(url_exe)
-                                let dest = path.join(outputdir, appName);
-                                var file = fs.createWriteStream(dest);
-
-                                axios({
-                                    url: url_exe,
-                                    method: 'GET',
-                                    responseType: 'arraybuffer', // important
-                                    onDownloadProgress: (progressEvent) => {
-                                        let percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total);
-                                        //console.log(percentCompleted);
-                                        document.querySelector(".card-body").innerHTML = "Downloading Updates...";
-                                        document.querySelector('#bar').innerHTML = `<div class="progress">
-                                        <div class="progress-bar progress-bar-striped" role="progressbar" style="width:${percentCompleted}%" aria-valuenow="${percentCompleted}">${percentCompleted}%</div></div>`
-                                    }
-                                }).then(response => {
-                                    const buffer = Buffer.from(response.data, 'base64');
-                                    file.write(buffer, 'base64');
-                                    displayUpdateStatus(modal, "Successfully Downloaded", 1500);
-
-                                    file.on('finish', () => {
-                                        console.log('wrote all data to file');
-                                        ipcRenderer.send("downloaded"); //send event to main process to ask for update
-                                    });
-
-                                    // close the stream
-                                    file.end();
-                                })
-
-                            }
-
-                            //show messagebox and begin installation if user response is yes (0)
-                            ipcRenderer.on("user-response", function(e, index) {
-                                if (index == 0) {
-                                    //displayUpdateStatus(modal, "Starting Installation", 3000);
-                                    shell.openExternal(outputdir + "/" + appName)
-                                    ipcRenderer.send("close-app")
-                                } else {
-                                    modal.style.display = "none";
-                                }
-                            });
-                        } else {
-                            console.log("up to date")
-                        }
-                    }
-                });
-        });
-    }
-
     //clear app
     $("#clear").click(function() {
         location.reload();

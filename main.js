@@ -18,7 +18,7 @@ app.on("ready", function() {
             nodeIntegration: true
         }
     });
-    // mainWindow.openDevTools();
+    //mainWindow.openDevTools();
     //mainWindow.autoHideMenuBar = true;
     // load html
     mainWindow.loadURL(

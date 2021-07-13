@@ -102,3 +102,56 @@ input[type="date"]::-webkit-calendar-picker-indicator {
     color: rgba(204, 204, 204, 0);
     opacity: 1;
 }
+
+#seminar1 .del,
+#seminar2 .del {
+    cursor: pointer;
+    margin-right: 3px;
+    font-weight: 600;
+}
+
+#seminar1 .add,
+#seminar2 .add {
+    background-color: #4CAF50;
+    border: none;
+    color: white;
+    padding: 5px 30px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+    margin: 2px;
+    cursor: pointer;
+    border-radius: 10px;
+    font-weight: 500;
+}
+
+#seminar1 .add:hover,
+#seminar2 .add:hover {
+    border: 1px solid #4CAF50;
+    background: white;
+    color: #4CAF50;
+    font-weight: 700;
+}
+
+
+/* .hidden::before {
+    content: "+";
+    margin-left: 5px;
+} */
+
+.sem_selector {
+    cursor: pointer !important;
+}
+
+.sem_content {
+    display: none;
+}
+
+.sign {
+    content: '+';
+}
+
+.minus {
+    content: "-";
+}
