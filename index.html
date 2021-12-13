@@ -8,7 +8,7 @@
     </script>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Menu Maker</title>
+    <title>Menu Maker 1.0.1</title>
 
     <link rel="stylesheet" href="index.css" />
     <link rel="stylesheet" href="bootstrap.min.css" />
@@ -24,31 +24,27 @@
 </head>
 
 <body>
-    <div class="container">
+    <div class="container-fluid">
         <div id="wrapper" class="mt-1">
             <div id="wrapper-inner">
                 <div class="row">
                     <div class="col-md-3">
                         <div id="left">
                             <!--choose server-->
-                            <div class="form-check mb-3">
-                                <input type="checkbox" class="form-check-input" name="server" id="testing" checked/>
+                            <!-- <div class="form-check mb-3">
+                                <input type="checkbox" class="form-check-input" name="server" id="testing" />
                                 <label class="form-check-label" for="server">Testing</label>
-                            </div>
+                            </div> -->
                             <!--calender year-->
                             <div id="yearCalender" class="mb-3">
-                                <div class="form-check form-check-inline">
-                                    <input type="radio" class="form-check-input" name="yearCalender" id="2020" />
-                                    <label class="form-check-label" for="2020">2020</label>
-                                </div>
-                                <div class="form-check form-check-inline">
-                                    <input type="radio" class="form-check-input" name="yearCalender" id="2021" checked />
-                                    <label class="form-check-label" for="2021">2021</label>
-                                </div>
-                                <div class="form-check form-check-inline">
-                                    <input type="radio" class="form-check-input" name="yearCalender" id="2022" />
-                                    <label class="form-check-label" for="2022">2022</label>
-                                </div>
+                                <select class="form-control">
+                                    <option>2021</option>
+                                    <option selected>2022</option>
+                                    <option>2023</option>
+                                    <option>2024</option>
+                                    <option>2025</option>
+                                  </select>
+
                             </div>
                             <div id="paths">
                                 <!--Start Courses-->
@@ -72,11 +68,6 @@
                                     <div class="form-check">
                                         <input type="radio" class="form-check-input" name="course" id="chineseFL" />
                                         <label class="form-check-label" for="chineseFL">chineseFL</label>
-                                    </div>
-
-                                    <div class="form-check">
-                                        <input type="radio" class="form-check-input" name="course" id="croatian" />
-                                        <label class="form-check-label" for="croatian">croatian</label>
                                     </div>
 
                                     <div class="form-check">
@@ -230,8 +221,8 @@
                                 <!--unit title-->
                                 <div class="form-check form-check-inline d-flex">
                                     <label class="form-check-label h5">Name</label>
-                                    <input type="text" style="width: 200px" placeholder="e.g. unit/semester" id="unit1Name" />
-                                    <input type="text" style="width: 200px" placeholder="e.g. unit/semester" id="unit2Name" />
+                                    <input type="text" style="width: 150px" placeholder="e.g. unit/semester" id="unit1Name" />
+                                    <input type="text" style="width: 150px" placeholder="e.g. unit/semester" id="unit2Name" />
                                 </div>
                                 <!--end unit title-->
                             </div>

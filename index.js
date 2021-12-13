@@ -1,20 +1,28 @@
 const electron = require("electron");
-const { shell } = require("electron");
-const ipc = electron.ipcRenderer;
+const { shell, webFrame } = require("electron");
+const ipcRenderer = electron.ipcRenderer;
 const path = require("path");
 const http = require("http");
+const https = require("https");
 const fs = require("fs");
 var cheerio = require("cheerio");
 var pretty = require("pretty");
 const os = require('os');
+const axios = require('axios').default;
 
 
 $(document).ready(function() {
-    //open links in default browser
+    ipcRenderer.send("chooseFile-dialog");
+    checkUpdates()
+        //open links in default browser
     $(document).on('click', 'a[href^="http"]', function(event) {
         event.preventDefault();
         shell.openExternal(this.href);
     });
+
+    // Set the zoom factor to 92%
+    webFrame.setZoomFactor(0.84);
+
 
     var cheer,
         unit1Name,
@@ -39,6 +47,7 @@ $(document).ready(function() {
         ol2 = "",
         outcome1 = "",
         outcome2 = "",
+        sem_div2 = "",
         s1_path, s2_path,
         seminar1, seminar2, s1, s2;
 
@@ -110,7 +119,7 @@ $(document).ready(function() {
 
         workset1 = "", workset2 = "", ol1 = "", ol2 = "", outcome1 = "", outcome2 = "", seminar1, seminar2;
         //get path
-        yearCalender = $("#yearCalender").find("input[type=radio]:checked").siblings("label").text();
+        yearCalender = $('#yearCalender').find('option').filter(':selected').text().trim();
         course = $("#courses").find("input[type=radio]:checked").siblings("label").text();
         year = $("#year").find("input[type=radio]:checked").siblings("label").text();
 
@@ -122,11 +131,11 @@ $(document).ready(function() {
             source2 = path.join(require("os").homedir(), "Desktop/menu_test.xml");
 
         } else {
-            // source = "\\\\vsl-file01\\coursesdev$\\courses\\" + yearCalender + "\\" + course + "\\" + year + "\\menu.xml";
-            // source2 = "\\\\vsl-file01\\coursesdev$\\courses\\" + yearCalender + "\\" + course + "\\" + year + "\\menu_test.xml";
-            // bak = "\\\\vsl-file01\\coursesdev$\\courses\\" + yearCalender + "\\" + course + "\\" + year + "\\menu.xml.bak";
-            // s1_path = "\\\\vsl-file01\\coursesdev$\\courses\\" + yearCalender + "\\" + course + "\\" + year + "\\seminar1.html";
-            // s2_path = "\\\\vsl-file01\\coursesdev$\\courses\\" + yearCalender + "\\" + course + "\\" + year + "\\seminar2.html";
+            source = "\\\\vsl-file01\\coursesdev$\\courses\\" + yearCalender + "\\" + course + "\\" + year + "\\menu.xml";
+            source2 = "\\\\vsl-file01\\coursesdev$\\courses\\" + yearCalender + "\\" + course + "\\" + year + "\\menu_test.xml";
+            bak = "\\\\vsl-file01\\coursesdev$\\courses\\" + yearCalender + "\\" + course + "\\" + year + "\\menu.xml.bak";
+            s1_path = "\\\\vsl-file01\\coursesdev$\\courses\\" + yearCalender + "\\" + course + "\\" + year + "\\seminar1.html";
+            s2_path = "\\\\vsl-file01\\coursesdev$\\courses\\" + yearCalender + "\\" + course + "\\" + year + "\\seminar2.html";
         }
 
         s1 = fileRead(s1_path);
@@ -203,7 +212,7 @@ $(document).ready(function() {
                 $("#outcome2").html(outcome2);
                 $("#seminar1").html(seminar1);
                 $("#seminar2").html(seminar2);
-                $("#seminar1").prepend(`<button class="btn btn-primary add">add</button>`);
+                $("#seminar1,#seminar2").prepend(`<button class="btn btn-primary add">add</button>`);
 
             } else {
                 $("#workset1,#workset2,#oral1,#oral2,#outcome1,#outcome2,#seminar1,#seminar2").html(err);
@@ -217,7 +226,7 @@ $(document).ready(function() {
     $(document).click(function(e) {
 
         if ($(e.target).attr('class') == "del") {
-            $(e.target).parent().parent('.sem').remove();
+            $(e.target).parent().parent().parent().children('.sem').length > 1 ? $(e.target).parent().parent('.sem').remove() : ''; //delete seminar only if more than 2
             console.log("clicked");
         }
 
@@ -225,7 +234,7 @@ $(document).ready(function() {
             let lastSeminar = $(e.target).closest('.tab-pane').children(".sem").last();
             let no = lastSeminar.find(".no").html();
             no = parseInt(no.charAt(no.length - 1))
-            alert(no)
+                //alert(no)
             console.log(lastSeminar)
             let holder = lastSeminar.clone();
             //holder=$.parseHTML(holder)
@@ -321,8 +330,8 @@ $(document).ready(function() {
                 if ($('#updateMenu').prop("checked") == true) {
                     fs.writeFile(source, newWorkset, function(err) {
                         if (!err) {
-                            // fs.writeFileSync(source2, newWorkset);
-                            // fs.writeFileSync(bak, newWorkset);
+                            fs.writeFileSync(source2, newWorkset);
+                            fs.writeFileSync(bak, newWorkset);
 
                             $("#status").addClass('alert-primary').removeClass('alert-danger').html("Updated " + course + " " + year);
                             displayMessage();
@@ -408,7 +417,7 @@ $(document).ready(function() {
             dueDate = dueDate.split("-").join("");
             let hideValue, hideAttr;
             if ($(this).find("#Hide").prop("checked") == false) {
-                hideValue = "yes";
+                hideValue = "disabled";
                 hideAttr = `hide="${hideValue}"`;
             } else {
                 hideValue = "no";
@@ -559,8 +568,9 @@ $(document).ready(function() {
         let sem = "";
         let editor = [];
         let $ = cheerio.load(content, { normalizeWhitespace: true, xmlMode: false, decodeEntities: false, withDomLvl1: true });
-
-        //start loop
+        sem_div2 = $('.seminar_divs-column2').html()
+        console.log(sem_div2)
+            //start loop
         $('.seminar').each(function(i) {
             let name = $(this).find('.seminar-name').html();
             let dueDate = $(this).find('.dt').html();
@@ -610,9 +620,11 @@ $(document).ready(function() {
     }
 
     function saveSeminar(content, newContent) {
-        let seminarData = "";
+        let seminarData = "",
+            sem_div2 = "";
         let $ = cheerio.load(content);
-        //start loop
+        $('.seminar_divs-column1').html('')
+            //start loop
         newContent.find('.sem').each(function(i) {
 
             let newName = newContent.find('#name').eq(i).val();
@@ -622,25 +634,27 @@ $(document).ready(function() {
             let currentSeminar = $(".seminar").eq(i);
             console.log(currentSeminar)
             let id = `"sem"${i+1}`;
-            if (newContent.find(".sem").eq(i) == $('.seminar').eq(i)) {
-                currentSeminar.find(".seminar-name").html(newName);
-                currentSeminar.find(".dt").html(newDate);
-                currentSeminar.find(".myDIV").html(newDesc);
-            } else {
-                let newSem = `
+
+            let newSem = `
+                        <div class="seminar">
                             <div class="seminar-selector">
                                 <div class="seminar-name">${newName}</div>
                                 <div class="dt">${newDate}</div>
                             </div>
                             <div style="clear:both"></div>
-                            <div id="sem1" class="myDIV">${newDesc}</div>`;
+                            <div id="sem${i+1}" class="myDIV">${newDesc}</div>
+                        </div>`;
 
-                $('.seminar_divs-column1').append(newSem)
-                console.log(newSem)
-            }
+            $('.seminar_divs-column1').append(newSem)
+            console.log(newSem)
+
 
 
         }); //end loop
+        $('.seminars_divs').append(`<div class="seminar_divs-column2">${sem_div2}</div>`);
+        $(".seminar_divs-column2").each(function() {
+            $(this).html() ? "" : $(this).remove();
+        })
 
         seminarData = $.html();
 
@@ -676,16 +690,16 @@ $(document).ready(function() {
         }, 3000);
     }
 
+
     function checkUpdates() {
-        document.querySelector("#filePath").value = localStorage.getItem("path") //get path from local storgae
 
         let user = "uzair4100";
-        let repo = "activity-maker";
-        let outputdir = path.join(os.homedir(), "AppData/Local/activity-maker/pending");
+        let repo = "menu-maker";
+        let outputdir = path.join(os.homedir(), "AppData/Local/menu-maker/pending");
         console.log(outputdir);
         let leaveZipped = false;
 
-        ipcRenderer.on("version", function(e, appVersion) {
+        ipcRenderer.on("_version", function(e, appVersion) {
             console.log(appVersion);
             let currentVersion = appVersion;
             axios.get(`https://api.github.com/repos/${user}/${repo}/releases/latest`)
@@ -698,13 +712,13 @@ $(document).ready(function() {
                     if (appVersion != "") {
                         if (currentVersion != latestVersion) {
                             console.log("update found")
-                            modal.style.display = "";
-                            document.querySelector(".card-body").innerHTML = "update found";
+                                // modal.style.display = "";
+                                // document.querySelector(".card-body").innerHTML = "update found";
                             if (fs.existsSync(outputdir + "/" + appName)) {
                                 ipcRenderer.send("downloaded")
                             } else {
-                                modal.style.display = "";
-                                !fs.existsSync(outputdir) ? fs.mkdirSync(outputdir) : "";
+                                // modal.style.display = "";
+                                // !fs.existsSync(outputdir) ? fs.mkdirSync(outputdir) : "";
                                 let existingFile = fs.readdirSync(outputdir).filter((file) => path.extname(file) == ".exe"); //check for existing exe file and delete them first
                                 existingFile.forEach((file) => fs.unlinkSync(outputdir + "/" + file));
                                 //console.log(data)
@@ -720,15 +734,15 @@ $(document).ready(function() {
                                     responseType: 'arraybuffer', // important
                                     onDownloadProgress: (progressEvent) => {
                                         let percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total);
-                                        //console.log(percentCompleted);
-                                        document.querySelector(".card-body").innerHTML = "Downloading Updates...";
-                                        document.querySelector('#bar').innerHTML = `<div class="progress">
-                                        <div class="progress-bar progress-bar-striped" role="progressbar" style="width:${percentCompleted}%" aria-valuenow="${percentCompleted}">${percentCompleted}%</div></div>`
+                                        console.log(percentCompleted);
+                                        //document.querySelector(".card-body").innerHTML = "Downloading Updates...";
+                                        //document.querySelector('#bar').innerHTML = `<div class="progress">
+                                        //<div class="progress-bar progress-bar-striped" role="progressbar" style="width:${percentCompleted}%" aria-valuenow="${percentCompleted}">${percentCompleted}%</div></div>`
                                     }
                                 }).then(response => {
                                     const buffer = Buffer.from(response.data, 'base64');
                                     file.write(buffer, 'base64');
-                                    displayUpdateStatus(modal, "Successfully Downloaded", 1500);
+                                    //displayUpdateStatus(modal, "Successfully Downloaded", 1500);
 
                                     file.on('finish', () => {
                                         console.log('wrote all data to file');
